@@ -4,7 +4,7 @@ import ExpenseForm from "./components/ExpenseForm";
 import ExpenseTable from "./components/ExpenseTable";
 import "./App.css";
 
-const API_URL = "http://localhost:8080/api/expenses";
+const API_URL = "/api/expenses";
 
 function App() {
   const [expenses, setExpenses] = useState([]);
