@@ -1,3 +1,14 @@
 spring:
   application:
     name: backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/expensedb?TimeZone=Asia/Kolkata
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
