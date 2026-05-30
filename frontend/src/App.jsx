@@ -8,11 +8,12 @@ const API_URL = "/api/expenses";
 
 function App() {
   const [expenses, setExpenses] = useState([]);
-  const [editingExpense, setEditingExpense] = useState(null); // holds expense being edited
+  const [summary, setSummary] = useState({});
+  const [editingExpense, setEditingExpense] = useState(null);
 
-  // Fetch all expenses from Spring Boot on page load
   useEffect(() => {
     fetchExpenses();
+    fetchSummary();
   }, []);
 
   const fetchExpenses = async () => {
@@ -24,18 +25,25 @@ function App() {
     }
   };
 
-  // Called by ExpenseForm when user submits — handles both create and update
+  const fetchSummary = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/summary`);
+      setSummary(response.data);
+    } catch (error) {
+      console.error("Failed to fetch summary:", error);
+    }
+  };
+
   const handleSave = async (expenseData) => {
     try {
       if (editingExpense) {
-        // PUT — update existing
         await axios.put(`${API_URL}/${editingExpense.id}`, expenseData);
         setEditingExpense(null);
       } else {
-        // POST — create new
         await axios.post(API_URL, expenseData);
       }
-      fetchExpenses(); // refresh the table
+      fetchExpenses();
+      fetchSummary();
     } catch (error) {
       console.error("Failed to save expense:", error);
     }
@@ -45,18 +53,14 @@ function App() {
     try {
       await axios.delete(`${API_URL}/${id}`);
       fetchExpenses();
+      fetchSummary();
     } catch (error) {
       console.error("Failed to delete expense:", error);
     }
   };
 
-  const handleEdit = (expense) => {
-    setEditingExpense(expense); // pre-fills the form
-  };
-
-  const handleCancelEdit = () => {
-    setEditingExpense(null);
-  };
+  const handleEdit = (expense) => setEditingExpense(expense);
+  const handleCancelEdit = () => setEditingExpense(null);
 
   return (
     <div className="app-container">
@@ -71,6 +75,21 @@ function App() {
           editingExpense={editingExpense}
           onCancelEdit={handleCancelEdit}
         />
+
+        {Object.keys(summary).length > 0 && (
+          <div className="summary-card">
+            <h2>Spending by Category</h2>
+            <div className="summary-grid">
+              {Object.entries(summary).map(([category, total]) => (
+                <div className="summary-item" key={category}>
+                  <div className="cat-label">{category}</div>
+                  <div className="cat-amount">₹{total.toFixed(2)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <ExpenseTable
           expenses={expenses}
           onDelete={handleDelete}
